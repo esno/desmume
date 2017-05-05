@@ -1,6 +1,7 @@
 /* cheats.cpp - this file is part of DeSmuME
  *
  * Copyright (C) 2006-2009 DeSmuME Team
+ * Copyright (C) 2017 crito <crito@fnordpipe.org>
  *
  * This file is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -55,12 +56,13 @@ static struct {
     const gchar *caption;
     gint type;
     gint column;
-} columnTable[]={
-    { "Enabled", TYPE_TOGGLE, COLUMN_ENABLED},
-    { "Size", TYPE_COMBO, COLUMN_SIZE},
-    { "Offset", TYPE_STRING, COLUMN_HI},
-    { "Value", TYPE_STRING, COLUMN_LO},
-    { "Description", TYPE_STRING, COLUMN_DESC}
+}
+
+columnTable[] = {
+    { "Enabled", TYPE_TOGGLE, COLUMN_ENABLED },
+    { "Address", TYPE_STRING, COLUMN_HI },
+    { "Value", TYPE_STRING, COLUMN_LO },
+    { "Description", TYPE_STRING, COLUMN_DESC }
 };
 
 static GtkWidget *win = NULL;
@@ -251,8 +253,8 @@ static void cheat_list_add_columns(GtkTreeView * tree, GtkListStore * store)
             g_object_set(renderer,
                          "model", size_model,
                          "text-column", COLUMN_SIZE_TEXT,
-                         "editable", TRUE, 
-                         "has-entry", FALSE, 
+                         "editable", TRUE,
+                         "has-entry", FALSE,
                          NULL);
             g_object_unref(size_model);
             g_signal_connect(renderer, "edited",
@@ -281,7 +283,7 @@ static void cheatListEnd()
 
 static GtkListStore *cheat_list_populate()
 {
-    GtkListStore *store = gtk_list_store_new (5, G_TYPE_BOOLEAN, 
+    GtkListStore *store = gtk_list_store_new (5, G_TYPE_BOOLEAN,
             G_TYPE_INT, G_TYPE_INT, G_TYPE_INT, G_TYPE_STRING);
 
     CHEATS_LIST cheat;
@@ -304,25 +306,61 @@ static GtkListStore *cheat_list_populate()
 static GtkWidget *cheat_list_create_ui()
 {
     GtkListStore *store = cheat_list_populate();
-    GtkWidget *tree = gtk_tree_view_new_with_model (GTK_TREE_MODEL (store));
+    GtkWidget *tree = gtk_tree_view_new_with_model(GTK_TREE_MODEL(store));
     GtkWidget *vbox = gtk_vbox_new(FALSE, 1);
+    GtkWidget *hbox = gtk_hbox_new(FALSE, 1);
     GtkWidget *hbbox = gtk_hbutton_box_new();
+    GtkWidget *lhbbox = gtk_hbutton_box_new();
+    GtkWidget *rhbbox = gtk_hbutton_box_new();
     GtkWidget *button;
-  
-    gtk_container_add(GTK_CONTAINER(vbox), GTK_WIDGET(tree));
-    gtk_container_add(GTK_CONTAINER(vbox), GTK_WIDGET(hbbox));
+
+    GtkWidget *lframe = gtk_frame_new("Add cheats code as...");
+    GtkWidget *rframe = gtk_frame_new("Modify existing cheats...");
+
     gtk_container_add(GTK_CONTAINER(win), GTK_WIDGET(vbox));
+    gtk_container_add(GTK_CONTAINER(vbox), GTK_WIDGET(tree));
+    gtk_container_add(GTK_CONTAINER(vbox), GTK_WIDGET(hbox));
+    gtk_container_add(GTK_CONTAINER(hbox), GTK_WIDGET(lframe));
+    gtk_container_add(GTK_CONTAINER(hbox), GTK_WIDGET(rframe));
 
-    button = gtk_button_new_with_label("add cheat");
-    g_signal_connect (button, "clicked", G_CALLBACK (cheat_list_add_cheat), store);
-    gtk_container_add(GTK_CONTAINER(hbbox),button);
+    gtk_box_set_spacing(GTK_BOX(lhbbox), 5);
+    gtk_button_box_set_layout(GTK_BUTTON_BOX(lhbbox), GTK_BUTTONBOX_START);
+    gtk_container_add(GTK_CONTAINER(lframe), GTK_WIDGET(lhbbox));
 
-    button = gtk_button_new_with_label("Remove cheat");
-    g_signal_connect (button, "clicked", G_CALLBACK (cheat_list_remove_cheat), tree);
-    gtk_container_add(GTK_CONTAINER(hbbox),button);
+    gtk_box_set_spacing(GTK_BOX(rhbbox), 5);
+    gtk_button_box_set_layout(GTK_BUTTON_BOX(rhbbox), GTK_BUTTONBOX_START);
+    gtk_container_add(GTK_CONTAINER(rframe), GTK_WIDGET(rhbbox));
+
+    button = gtk_button_new_with_label("internal");
+    gtk_container_add(GTK_CONTAINER(lhbbox), button);
+
+    button = gtk_button_new_with_label("Action Replay");
+    gtk_container_add(GTK_CONTAINER(lhbbox), button);
+
+    button = gtk_button_new_with_label("Edit");
+    gtk_widget_set_sensitive(GTK_WIDGET(button), FALSE);
+    gtk_container_add(GTK_CONTAINER(rhbbox), button);
+
+    button = gtk_button_new_with_label("Remove");
+    gtk_widget_set_sensitive(GTK_WIDGET(button), FALSE);
+    gtk_container_add(GTK_CONTAINER(rhbbox), button);
+
+    button = gtk_button_new_with_label("Cheats base");
+    gtk_container_add(GTK_CONTAINER(rhbbox), button);
+
+    gtk_box_set_spacing(GTK_BOX(hbbox), 5);
+    gtk_button_box_set_layout(GTK_BUTTON_BOX(hbbox), GTK_BUTTONBOX_START);
+    gtk_container_add(GTK_CONTAINER(vbox), GTK_WIDGET(hbbox));
+
+    button = gtk_button_new_with_label("Save");
+    gtk_widget_set_sensitive(GTK_WIDGET(button), FALSE);
+    gtk_container_add(GTK_CONTAINER(hbbox), button);
+
+    button = gtk_button_new_with_label("Cancel");
+    gtk_container_add(GTK_CONTAINER(hbbox), button);
 
     cheat_list_add_columns(GTK_TREE_VIEW(tree), store);
-    
+
     /* Setup the selection handler */
     GtkTreeSelection *select;
     select = gtk_tree_view_get_selection (GTK_TREE_VIEW (tree));
@@ -355,7 +393,7 @@ static void cheat_search_create_ui()
     GtkWidget *vbox = gtk_vbox_new(FALSE, 1);
     GtkWidget *hbbox = gtk_hbutton_box_new();
     GtkWidget *b;
-    
+
     gtk_container_add(GTK_CONTAINER(win), GTK_WIDGET(vbox));
 
     {
