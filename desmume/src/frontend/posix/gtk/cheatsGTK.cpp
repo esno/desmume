@@ -291,14 +291,22 @@ static GtkListStore *cheat_list_populate()
     for(u32 ii = 0; ii < chsize; ii++){
         GtkTreeIter iter;
         cheats->get(&cheat, ii);
+
         gtk_list_store_append(store, &iter);
-        gtk_list_store_set(store, &iter,
-                COLUMN_ENABLED, cheat.enabled,
-                COLUMN_SIZE, cheat.size+1,
-                COLUMN_HI, cheat.code[0][0],
-                COLUMN_LO, cheat.code[0][1],
-                COLUMN_DESC, cheat.description,
-                -1);
+
+        switch(cheat.type)
+        {
+            case CHEAT_TYPE_AR:
+            {
+                gtk_list_store_set(store, &iter,
+                    COLUMN_ENABLED, cheat.enabled,
+                    COLUMN_HI, "Action",
+                    COLUMN_LO, "Replay",
+                    COLUMN_DESC, cheat.description,
+                    -1);
+                break;
+            }
+        }
     }
     return store;
 }
@@ -308,12 +316,12 @@ static void cheat_list_create_ar_cheat_ui(GtkWidget *widget, gpointer data)
     GtkWidget *win_ar = gtk_window_new(GTK_WINDOW_TOPLEVEL);
     gtk_window_set_title(GTK_WINDOW(win_ar),"Add Action Replay code");
     gtk_window_set_modal(GTK_WINDOW(win_ar), TRUE);
-    //g_signal_connect(G_OBJECT(win_ar), "destroy", cheatListEnd, NULL);
 
     GtkWidget *vbox = gtk_vbox_new(FALSE, 1);
     GtkWidget *label = gtk_label_new("Code:");
     GtkWidget *textfield = gtk_text_view_new();
     GtkWidget *hbox = gtk_hbox_new(FALSE, 1);
+    GtkWidget *checkbox = gtk_check_button_new_with_label("turn on code");
     GtkWidget *button;
 
     gtk_container_add(GTK_CONTAINER(win_ar), GTK_WIDGET(vbox));
@@ -325,6 +333,7 @@ static void cheat_list_create_ar_cheat_ui(GtkWidget *widget, gpointer data)
 
     gtk_container_add(GTK_CONTAINER(vbox), GTK_WIDGET(label));
     gtk_container_add(GTK_CONTAINER(vbox), GTK_WIDGET(textfield));
+    gtk_container_add(GTK_CONTAINER(vbox), GTK_WIDGET(checkbox));
     gtk_container_add(GTK_CONTAINER(vbox), GTK_WIDGET(hbox));
 
     button = gtk_button_new_with_label("Add");
