@@ -303,6 +303,40 @@ static GtkListStore *cheat_list_populate()
     return store;
 }
 
+static void cheat_list_create_ar_cheat_ui(GtkWidget *widget, gpointer data)
+{
+    GtkWidget *win_ar = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+    gtk_window_set_title(GTK_WINDOW(win_ar),"Add Action Replay code");
+    gtk_window_set_modal(GTK_WINDOW(win_ar), TRUE);
+    //g_signal_connect(G_OBJECT(win_ar), "destroy", cheatListEnd, NULL);
+
+    GtkWidget *vbox = gtk_vbox_new(FALSE, 1);
+    GtkWidget *label = gtk_label_new("Code:");
+    GtkWidget *textfield = gtk_text_view_new();
+    GtkWidget *hbox = gtk_hbox_new(FALSE, 1);
+    GtkWidget *button;
+
+    gtk_container_add(GTK_CONTAINER(win_ar), GTK_WIDGET(vbox));
+    gtk_container_add(GTK_CONTAINER(vbox), GTK_WIDGET(label));
+    gtk_container_add(GTK_CONTAINER(vbox), GTK_WIDGET(textfield));
+
+    label = gtk_label_new("Description:");
+    textfield = gtk_text_view_new();
+
+    gtk_container_add(GTK_CONTAINER(vbox), GTK_WIDGET(label));
+    gtk_container_add(GTK_CONTAINER(vbox), GTK_WIDGET(textfield));
+    gtk_container_add(GTK_CONTAINER(vbox), GTK_WIDGET(hbox));
+
+    button = gtk_button_new_with_label("Add");
+    gtk_widget_set_sensitive(GTK_WIDGET(button), FALSE);
+    gtk_container_add(GTK_CONTAINER(hbox), button);
+
+    button = gtk_button_new_with_label("Cancel");
+    gtk_container_add(GTK_CONTAINER(hbox), button);
+
+    gtk_widget_show_all(win_ar);
+}
+
 static GtkWidget *cheat_list_create_ui()
 {
     GtkListStore *store = cheat_list_populate();
@@ -335,6 +369,7 @@ static GtkWidget *cheat_list_create_ui()
     gtk_container_add(GTK_CONTAINER(lhbbox), button);
 
     button = gtk_button_new_with_label("Action Replay");
+    g_signal_connect(button, "clicked", G_CALLBACK(cheat_list_create_ar_cheat_ui), store);
     gtk_container_add(GTK_CONTAINER(lhbbox), button);
 
     button = gtk_button_new_with_label("Edit");
