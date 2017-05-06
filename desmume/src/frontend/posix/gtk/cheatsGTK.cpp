@@ -311,6 +311,32 @@ static GtkListStore *cheat_list_populate()
     return store;
 }
 
+static void cheat_ar_validation(GtkTextBuffer *textbuffer, gpointer data)
+{
+    CHEATS *newARCheat = new CHEATS();
+    GtkTextIter start_iter, end_iter;
+
+    gtk_text_buffer_get_start_iter(textbuffer, &start_iter);
+    gtk_text_buffer_get_end_iter(textbuffer, &end_iter);
+
+    gchar *ar_code = gtk_text_buffer_get_text(
+                      textbuffer,
+                      &start_iter,
+                      &end_iter,
+                      FALSE);
+
+    if(strlen(ar_code) != 0 && newARCheat->add_AR(ar_code, "action replay", FALSE))
+    {
+        gtk_widget_set_sensitive(GTK_WIDGET(data), TRUE);
+    }
+    else
+    {
+        gtk_widget_set_sensitive(GTK_WIDGET(data), FALSE);
+    }
+
+    g_free(ar_code);
+}
+
 static void cheat_list_create_ar_cheat_ui(GtkWidget *widget, gpointer data)
 {
     GtkWidget *win_ar = gtk_window_new(GTK_WINDOW_TOPLEVEL);
@@ -320,6 +346,7 @@ static void cheat_list_create_ar_cheat_ui(GtkWidget *widget, gpointer data)
     GtkWidget *vbox = gtk_vbox_new(FALSE, 1);
     GtkWidget *label = gtk_label_new("Code:");
     GtkWidget *textfield = gtk_text_view_new();
+    GtkTextBuffer *textbuffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(textfield));
     GtkWidget *hbox = gtk_hbox_new(FALSE, 1);
     GtkWidget *checkbox = gtk_check_button_new_with_label("turn on code");
     GtkWidget *button;
@@ -337,6 +364,7 @@ static void cheat_list_create_ar_cheat_ui(GtkWidget *widget, gpointer data)
     gtk_container_add(GTK_CONTAINER(vbox), GTK_WIDGET(hbox));
 
     button = gtk_button_new_with_label("Add");
+    g_signal_connect(textbuffer, "changed", G_CALLBACK(cheat_ar_validation), button);
     gtk_widget_set_sensitive(GTK_WIDGET(button), FALSE);
     gtk_container_add(GTK_CONTAINER(hbox), button);
 
