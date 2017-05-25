@@ -56,13 +56,16 @@ static struct {
     const gchar *caption;
     gint type;
     gint column;
-}
-
-columnTable[] = {
+} columnTable[] = {
     { "Enabled", TYPE_TOGGLE, COLUMN_ENABLED },
     { "Address", TYPE_STRING, COLUMN_HI },
     { "Value", TYPE_STRING, COLUMN_LO },
     { "Description", TYPE_STRING, COLUMN_DESC }
+};
+
+struct gSignalData {
+    gpointer *store;
+    gpointer *cheat;
 };
 
 static GtkWidget *win = NULL;
@@ -283,7 +286,7 @@ static void cheatListEnd()
 
 static GtkListStore *cheat_list_populate()
 {
-    GtkListStore *store = gtk_list_store_new (5, G_TYPE_BOOLEAN,
+    GtkListStore *store = gtk_list_store_new(5, G_TYPE_BOOLEAN,
             G_TYPE_INT, G_TYPE_INT, G_TYPE_INT, G_TYPE_STRING);
 
     CHEATS_LIST cheat;
@@ -337,6 +340,11 @@ static void cheat_ar_validation(GtkTextBuffer *textbuffer, gpointer data)
     g_free(ar_code);
 }
 
+static void cheat_list_add_ar_cheat(GtkWidget *widget, gpointer data)
+{
+    //data.append()
+}
+
 static void cheat_list_create_ar_cheat_ui(GtkWidget *widget, gpointer data)
 {
     GtkWidget *win_ar = gtk_window_new(GTK_WINDOW_TOPLEVEL);
@@ -365,6 +373,7 @@ static void cheat_list_create_ar_cheat_ui(GtkWidget *widget, gpointer data)
 
     button = gtk_button_new_with_label("Add");
     g_signal_connect(textbuffer, "changed", G_CALLBACK(cheat_ar_validation), button);
+    g_signal_connect(button, "clicked", G_CALLBACK(cheat_list_add_ar_cheat), data);
     gtk_widget_set_sensitive(GTK_WIDGET(button), FALSE);
     gtk_container_add(GTK_CONTAINER(hbox), button);
 
